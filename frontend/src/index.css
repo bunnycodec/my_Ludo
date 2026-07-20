@@ -1,0 +1,30 @@
+/* Tailwind v4: one import, and the design tokens live right here in CSS.
+   Everything under @theme becomes usable as utility classes — e.g. --color-pine
+   gives us bg-pine, text-pine, border-pine, etc. */
+@import 'tailwindcss';
+
+@theme {
+  /* Warm ivory + deep green palette (agreed design direction) */
+  --color-ivory: #faf6ee; /* page background */
+  --color-parchment: #f1ead9; /* slightly deeper warm tone for hovers/stripes */
+  --color-pine: #1e5c46; /* primary accent — deep board green */
+  --color-pine-dark: #164534; /* hover/pressed state of the accent */
+  --color-ink: #2b2b26; /* main text — warm near-black */
+  --color-ink-soft: #6f6a5e; /* secondary text */
+  --color-line: #e3dcc9; /* borders/dividers */
+
+  /* The four Ludo colors — reserved for game meaning (tokens, player badges),
+     not general decoration */
+  --color-ludo-red: #e64545;
+  --color-ludo-green: #2f9e44;
+  --color-ludo-yellow: #f2b705;
+  --color-ludo-blue: #2e6fd8;
+
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

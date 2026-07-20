@@ -1,0 +1,120 @@
+/* Small shared building blocks used across pages, so every form field and button
+ * looks identical without repeating long Tailwind class strings. */
+
+export function Card({ title, children, action }) {
+  return (
+    <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+      {(title || action) && (
+        <div className="mb-4 flex items-center justify-between">
+          {title && <h2 className="text-lg font-bold">{title}</h2>}
+          {action}
+        </div>
+      )}
+      {children}
+    </section>
+  )
+}
+
+export function Button({ children, variant = 'primary', ...props }) {
+  const styles = {
+    primary:
+      'bg-pine text-white hover:bg-pine-dark disabled:bg-line disabled:text-ink-soft',
+    subtle:
+      'border border-line bg-white text-ink hover:bg-parchment disabled:text-ink-soft',
+    danger:
+      'bg-ludo-red text-white hover:bg-ludo-red/90 disabled:bg-line disabled:text-ink-soft',
+  }
+  return (
+    <button
+      className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-colors disabled:cursor-not-allowed ${styles[variant]}`}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+export function Field({ label, ...props }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-semibold text-ink-soft">{label}</span>
+      <input
+        className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink outline-none focus:border-pine"
+        {...props}
+      />
+    </label>
+  )
+}
+
+/* Native <select>, restyled to match Field instead of the browser's default
+ * dropdown look — appearance-none strips the OS chrome so our border/focus
+ * ring/chevron render consistently, while staying a real <select> for
+ * accessibility and keyboard/mobile picker support. */
+export function Select({ label, children, ...props }) {
+  const select = (
+    <div className="relative">
+      <select
+        className="w-full appearance-none rounded-xl border border-line bg-white px-3.5 py-2.5 pr-9 text-sm text-ink outline-none focus:border-pine"
+        {...props}
+      >
+        {children}
+      </select>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-soft"
+      >
+        <path d="M2 5l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  )
+  if (!label) return select
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-semibold text-ink-soft">{label}</span>
+      {select}
+    </label>
+  )
+}
+
+export function ErrorNote({ children }) {
+  if (!children) return null
+  return (
+    <p className="rounded-xl border border-ludo-red/30 bg-ludo-red/5 px-3.5 py-2.5 text-sm font-semibold text-ludo-red">
+      {children}
+    </p>
+  )
+}
+
+export function SuccessNote({ children }) {
+  if (!children) return null
+  return (
+    <p className="rounded-xl border border-ludo-green/30 bg-ludo-green/5 px-3.5 py-2.5 text-sm font-semibold text-ludo-green">
+      {children}
+    </p>
+  )
+}
+
+export function EmptyState({ children }) {
+  return (
+    <p className="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink-soft">
+      {children}
+    </p>
+  )
+}
+
+/* The four-dot Ludo mark used as the app logo. */
+export function Logo({ size = 28 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="1" y="1" width="30" height="30" rx="7" className="fill-pine" />
+      <circle cx="11" cy="11" r="4" fill="#e64545" />
+      <circle cx="21" cy="11" r="4" fill="#2f9e44" />
+      <circle cx="11" cy="21" r="4" fill="#f2b705" />
+      <circle cx="21" cy="21" r="4" fill="#2e6fd8" />
+    </svg>
+  )
+}

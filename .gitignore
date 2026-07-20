@@ -1,0 +1,15 @@
+# Secrets — never commit real credentials
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Local dev database
+*.db
+
+# Node (frontend, later phases)
+node_modules/
+dist/
