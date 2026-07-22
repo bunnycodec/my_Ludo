@@ -162,9 +162,9 @@ function DiceCube({ rotation, active, clickable, onRoll, blankFront }) {
         onClick={onRoll}
         disabled={!clickable}
         aria-label="Roll the dice"
-        className={`relative block transition-[filter,opacity] duration-300 ${
+        className={`relative block transition-opacity duration-300 ${
           clickable ? 'cursor-pointer' : 'cursor-default'
-        } ${active ? '' : 'opacity-50 grayscale'}`}
+        } ${active ? '' : 'opacity-65'}`}
         style={{
           width: CUBE_SIZE,
           height: CUBE_SIZE,
