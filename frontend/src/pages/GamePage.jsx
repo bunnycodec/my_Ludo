@@ -98,14 +98,15 @@ const DIE_PIPS = {
   6: [[25, 25], [25, 50], [25, 75], [75, 25], [75, 50], [75, 75]],
 }
 
-function DiePips({ value }) {
-  if (!value) return <span className="text-base font-extrabold text-ink-soft">?</span>
+function DiePips({ value, dim }) {
   return (
     <>
       {DIE_PIPS[value].map(([top, left], i) => (
         <span
           key={i}
-          className="absolute h-[15%] w-[15%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink"
+          className={`absolute h-[15%] w-[15%] -translate-x-1/2 -translate-y-1/2 rounded-full ${
+            dim ? 'bg-ink-soft' : 'bg-ink'
+          }`}
           style={{ top: `${top}%`, left: `${left}%` }}
         />
       ))}
@@ -119,6 +120,11 @@ function DiePips({ value }) {
 // how big the board itself is.
 const CUBE_SIZE = 46
 const HALF = CUBE_SIZE / 2
+// How long the dice's tumble transition takes — shared with GamePage's own
+// roll handling so a mandatory (only-one-legal-move) auto-move waits for the
+// tumble to actually finish landing before it starts, rather than firing the
+// moment the roll response arrives.
+const DICE_TUMBLE_MS = 700
 const FACE_VALUE = { front: 1, back: 6, right: 2, left: 5, top: 3, bottom: 4 }
 const FACE_TRANSFORM = {
   front: `translateZ(${HALF}px)`,
@@ -147,14 +153,16 @@ function mod360(deg) {
  * GamePage computes a new target (current + however much is needed to land
  * on the rolled face, plus a couple of extra full spins) on every fresh
  * roll and lets the CSS transition tumble the cube there — real 3D rotation
- * showing genuine faces in transit, not a simulated flat spin.
+ * showing genuine faces in transit, not a simulated flat spin. Before the
+ * first roll of the game, the cube just sits at its default orientation —
+ * front face (1) showing — rather than a "?" placeholder.
  *
  * `active` (whose turn it is) and `clickable` (can this exact click do
  * something right now) are deliberately separate: `active` stays true for
  * your whole turn, including the moment after you've rolled and are
  * choosing a token to move, so the glow keeps identifying "this is your
  * turn" even while the die itself is briefly disabled again. */
-function DiceCube({ rotation, active, clickable, onRoll, blankFront }) {
+function DiceCube({ rotation, active, clickable, onRoll }) {
   return (
     <div style={{ perspective: '260px' }}>
       <button
@@ -162,24 +170,24 @@ function DiceCube({ rotation, active, clickable, onRoll, blankFront }) {
         onClick={onRoll}
         disabled={!clickable}
         aria-label="Roll the dice"
-        className={`relative block transition-opacity duration-300 ${
-          clickable ? 'cursor-pointer' : 'cursor-default'
-        } ${active ? '' : 'opacity-65'}`}
+        className={`relative block ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
         style={{
           width: CUBE_SIZE,
           height: CUBE_SIZE,
           transformStyle: 'preserve-3d',
           transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-          transition: 'transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1)',
+          transition: `transform ${DICE_TUMBLE_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
         }}
       >
         {Object.entries(FACE_TRANSFORM).map(([name, transform]) => (
           <div
             key={name}
-            className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-ink/15 bg-white shadow-sm"
+            className={`absolute inset-0 flex items-center justify-center rounded-xl border-2 shadow-sm ${
+              active ? 'border-ink/15 bg-white' : 'border-ink/10 bg-parchment'
+            }`}
             style={{ transform, backfaceVisibility: 'hidden' }}
           >
-            <DiePips value={blankFront && name === 'front' ? null : FACE_VALUE[name]} />
+            <DiePips value={FACE_VALUE[name]} dim={!active} />
           </div>
         ))}
         {active && (
@@ -341,6 +349,7 @@ export default function GamePage() {
   const [animatingTokens, setAnimatingTokens] = useState({})
   const prevPositionsRef = useRef({}) // tokenId -> last known real position
   const stepTimersRef = useRef({}) // tokenId -> interval id, so a new move can cancel a stale one
+  const autoMoveTimerRef = useRef(null) // pending mandatory (only-one-legal-move) auto-move, if any
 
   async function refresh() {
     try {
@@ -374,7 +383,7 @@ export default function GamePage() {
     diceRotationRef.current = { x: nextX, y: nextY }
     setDiceRotation({ x: nextX, y: nextY })
     setDiceRolling(true)
-    const t = setTimeout(() => setDiceRolling(false), 700)
+    const t = setTimeout(() => setDiceRolling(false), DICE_TUMBLE_MS)
     return () => clearTimeout(t)
   }, [board?.roll_sequence])
 
@@ -462,7 +471,17 @@ export default function GamePage() {
     setBusy(true)
     setError('')
     try {
-      setBoard(await api.rollDice(gameId))
+      const newBoard = await api.rollDice(gameId)
+      setBoard(newBoard)
+      // Only one token can legally move — there's no real decision to make,
+      // so move it automatically instead of making the player click it.
+      // Waits for the dice's own tumble to actually finish landing first
+      // (DICE_TUMBLE_MS) rather than firing the instant the roll response
+      // arrives, so the roll and its consequence stay visually sequential.
+      if (newBoard.my_movable_token_ids.length === 1) {
+        const onlyTokenId = newBoard.my_movable_token_ids[0]
+        autoMoveTimerRef.current = setTimeout(() => handleMove(onlyTokenId), DICE_TUMBLE_MS)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -471,6 +490,10 @@ export default function GamePage() {
   }
 
   async function handleMove(tokenId) {
+    if (autoMoveTimerRef.current) {
+      clearTimeout(autoMoveTimerRef.current)
+      autoMoveTimerRef.current = null
+    }
     setBusy(true)
     setError('')
     try {
@@ -678,7 +701,6 @@ export default function GamePage() {
               active={myTurn}
               clickable={diceClickable}
               onRoll={handleRoll}
-              blankFront={board.last_roll_value === null}
             />
           )}
         </div>
