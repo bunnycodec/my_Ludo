@@ -9,9 +9,12 @@ FastAPI still handles it exactly as before.
 """
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import socketio
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .db import init_db
 from .routes import admin, auth, gameplay, games, leaderboard, users
@@ -41,6 +44,44 @@ fastapi_app.include_router(leaderboard.router)
 def health():
     """Simple liveness check — also what uptime monitors can ping."""
     return {"status": "ok"}
+
+
+# --- Production: this one server also serves the built frontend -------------
+#
+# In production (Render), there is no Vite dev server: the React app is built
+# to static files (frontend/dist) at deploy time and served from here, so the
+# browser and the API share one origin — the auth cookie flows exactly like it
+# does through the dev proxy, and no CORS config is ever needed.
+#
+# Two pieces, both no-ops in local dev where requests go via Vite on :5173:
+#
+# 1. A middleware that answers any *page navigation* (a GET whose Accept header
+#    asks for text/html) with the SPA's index.html, letting React's router take
+#    over. This is what makes a hard refresh or shared link on /leaderboard,
+#    /members, /game/7 etc. work — and /leaderboard genuinely NEEDS it, since
+#    an API route with the same path exists and would otherwise answer a
+#    browser navigation with raw JSON. API fetches are unaffected (they don't
+#    send Accept: text/html); the excluded prefixes keep FastAPI's own HTML
+#    pages (Swagger docs) reachable.
+# 2. A catch-all static mount for the real files (JS/CSS/images). Mounted last,
+#    so every API route registered above still wins.
+
+_frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+_SPA_EXCLUDED_PREFIXES = ("/docs", "/redoc", "/openapi.json", "/socket.io", "/health")
+
+if _frontend_dist.is_dir():
+
+    @fastapi_app.middleware("http")
+    async def spa_navigation_fallback(request: Request, call_next):
+        if (
+            request.method == "GET"
+            and "text/html" in request.headers.get("accept", "")
+            and not request.url.path.startswith(_SPA_EXCLUDED_PREFIXES)
+        ):
+            return FileResponse(_frontend_dist / "index.html")
+        return await call_next(request)
+
+    fastapi_app.mount("/", StaticFiles(directory=_frontend_dist), name="frontend")
 
 
 app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
