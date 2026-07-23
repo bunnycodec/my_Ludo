@@ -17,10 +17,11 @@ game lifecycle: mid-game cancel, admin Confirm/Reject, points/stat aggregation).
 A same-day Phase 5 follow-up made usernames case-insensitive at login/creation
 (like Gmail). Phase 6 (Leaderboard wiring) and Phase 7 (visual/UX polish +
 the Codec Ludo rebrand, new app icon, Members Area rename, real About page)
-are signed off. A pre-deployment hardening pass (debug tools removed, code
-dedupe — see its section below) is built and awaiting review sign-off. The
-GitHub repo is renamed to `bunnycodec/codec_ludo`. Next: deployment (Render +
-Neon Postgres + ludo.bunnycodec.com).
+are signed off, as is the pre-deployment hardening pass (debug tools removed,
+code dedupe — see its section below). The GitHub repo is renamed to
+`bunnycodec/codec_ludo`. **The app is LIVE in production** (2026-07-23) — see
+the Deployment section at the bottom of this file. Remaining: pointing
+ludo.bunnycodec.com at it (in progress).
 
 Section 13 is now a **two-gate cycle per phase**: (1) plan gate — describe what's
 about to be built and stop for approval, (2) build the phase, (3) review gate — stop,
@@ -872,6 +873,42 @@ the session cookie is already `httponly` + `samesite=lax` with a
 credentials already come from env vars; the backend needs no CORS config
 since production will serve frontend and API from one origin, same as the
 dev proxy does.
+
+## Deployment (live since 2026-07-23)
+
+**URL:** https://codec-ludo.onrender.com (custom domain ludo.bunnycodec.com
+being added). **Hosting:** one Render free-tier Web Service (workspace on the
+user's GitHub-linked account), region Singapore — chosen because most players
+are in India (the admin is in the UK); the database sits in the same region
+since app↔DB latency matters more than user↔app. **Database:** Neon free-tier
+Postgres, project `codec-ludo`, also Singapore. **Deploys:** automatic on
+every push to `main` — the repo on GitHub is the source of truth; Render
+clones and builds it, and a failed build keeps the previous version live.
+
+Render service settings, as configured:
+- Language **Python 3**, branch `main`, root directory empty
+- Build: `npm --prefix frontend install && npm --prefix frontend run build && pip install ./backend`
+- Start: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Env vars: `DATABASE_URL` (Neon connection string), `JWT_SECRET`
+  (Render-generated), `COOKIE_SECURE=true`, `ADMIN_USERNAME`,
+  `ADMIN_TEMP_PASSWORD` (seed admin — password rotated at first login)
+
+How one service serves everything: the build compiles the React app to
+`frontend/dist`; `main.py` serves those static files and answers page
+navigations (Accept: text/html) with the SPA's index.html — see the
+"Production" block in `main.py`. Same-origin means the auth cookie works
+exactly as through the dev proxy; no CORS anywhere. `db.py` rewrites
+`postgresql://` URLs to `postgresql+psycopg://` so Neon's string pastes
+as-is.
+
+Known free-tier behaviors, accepted by design: the service sleeps after ~15
+min idle (~30-50s cold start; family coordinates over WhatsApp anyway), and
+a $0 build-minutes spend limit is set so overage pauses builds instead of
+charging. **Gotchas for future changes:** any schema change to an existing
+table needs a manual `ALTER TABLE` against the production Neon DB at deploy
+time (still no migration tool — Alembic is the agreed first post-launch
+improvement), and Neon's free tier keeps only a short restore window, so an
+occasional `pg_dump` export is the cheap backup insurance.
 
 ## How to use this file
 
