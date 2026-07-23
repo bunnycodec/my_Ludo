@@ -2,7 +2,7 @@
  *
  * Game invites are refresh-on-demand rather than push, per the spec's
  * no-notifications design and the user's preference for a manual Refresh
- * button — the family coordinates timing over WhatsApp, not in-app alerts.
+ * button — players coordinate timing over WhatsApp, not in-app alerts.
  * Stats and the admin Confirm/Reject queue (Phase 5) share that same
  * refresh-on-demand pattern rather than live-updating. */
 

@@ -35,14 +35,19 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-3">
+        <div className="mb-6 flex flex-col items-center gap-3 animate-page-rise">
           <Logo size={48} />
-          <h1 className="text-2xl font-extrabold">Family Ludo</h1>
-          <p className="text-sm text-ink-soft">Family members only — ask the admin for an account.</p>
+          <h1 className="text-2xl font-extrabold">Codec Ludo</h1>
+          <p className="text-center text-sm text-ink-soft">
+            Invite only — want in? Reach out at{' '}
+            <a href="mailto:sunnykumar@bunnycodec.com" className="font-bold text-pine hover:underline">
+              sunnykumar@bunnycodec.com
+            </a>
+          </p>
         </div>
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
+          className="space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm animate-page-rise"
         >
           <Field
             label="Username"

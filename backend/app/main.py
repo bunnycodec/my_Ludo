@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-fastapi_app = FastAPI(title="Family Ludo", lifespan=lifespan)
+fastapi_app = FastAPI(title="Codec Ludo", lifespan=lifespan)
 
 fastapi_app.include_router(auth.router)
 fastapi_app.include_router(admin.router)

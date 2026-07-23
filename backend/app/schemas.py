@@ -42,7 +42,7 @@ class UserOut(BaseModel):
 
 class UserStatsOut(BaseModel):
     """Career totals (spec Section 11), confirmed games only. Kept separate
-    from UserOut — which is embedded all over the place (invites, family
+    from UserOut — which is embedded all over the place (invites, member
     roster, etc.) — so stats don't leak into contexts that don't need them."""
 
     total_points: int

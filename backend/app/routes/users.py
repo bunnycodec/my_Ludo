@@ -1,8 +1,8 @@
-"""Read-only family roster, for picking players when creating a game.
+"""Read-only member roster, for picking players when creating a game.
 
-Distinct from /admin/users: any logged-in player can see who else is in the
-family (they need this to invite people), but only an admin can create/reset/
-delete accounts.
+Distinct from /admin/users: any logged-in player can see who else is a member
+(they need this to invite people), but only an admin can create/reset/delete
+accounts — membership is invite-only.
 """
 
 from fastapi import APIRouter
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("", response_model=list[UserOut])
-def list_family(user: CurrentUser, session: DbSession):
+def list_members(user: CurrentUser, session: DbSession):
     users = session.exec(select(User).order_by(User.username)).all()
     return [UserOut.model_validate(u, from_attributes=True) for u in users]
 
@@ -25,7 +25,7 @@ def list_family(user: CurrentUser, session: DbSession):
 def my_stats(user: CurrentUser):
     """Career totals (spec Section 11), confirmed games only — feeds the
     Dashboard's "Your Stats" card. Kept off UserOut itself since that shape is
-    embedded all over the place (invites, family roster) that doesn't need it."""
+    embedded all over the place (invites, member roster) that doesn't need it."""
     win_percentage = (user.wins / user.games_played * 100) if user.games_played else None
     return UserStatsOut(
         total_points=user.total_points,

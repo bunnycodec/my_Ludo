@@ -60,7 +60,7 @@ export const changePassword = (currentPassword, newPassword) =>
     body: { current_password: currentPassword, new_password: newPassword },
   })
 
-// --- Admin (Manage Family) ---
+// --- Admin (Members Area) ---
 export const listUsers = () => request('/admin/users')
 
 export const createUser = (username, tempPassword) =>
@@ -74,8 +74,8 @@ export const resetPassword = (userId, tempPassword) =>
 
 export const deleteUser = (userId) => request(`/admin/users/${userId}`, { method: 'DELETE' })
 
-// --- Family roster (any logged-in user, for picking invitees) ---
-export const listFamily = () => request('/users')
+// --- Member roster (any logged-in user, for picking invitees) ---
+export const listMembers = () => request('/users')
 
 export const getMyStats = () => request('/users/me/stats')
 

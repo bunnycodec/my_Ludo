@@ -1,14 +1,16 @@
-/* Manage Family (admin only) — fully functional against the Phase 1 backend:
- * list every account, add a family member with a temp password, reset someone's
- * password. Resetting also logs that person out everywhere (the backend clears
- * their session), so hand them the new temp password over WhatsApp. */
+/* Members Area (admin only) — the invite-only membership desk: list every
+ * account, add a member with a temp password, reset someone's password. The
+ * game is open to anyone, but only the admin can create accounts — there is
+ * no public signup. Resetting a password also logs that person out everywhere
+ * (the backend clears their session), so hand them the new temp password
+ * directly. */
 
 import { useEffect, useState } from 'react'
 import * as api from '../api'
 import { useAuth } from '../auth'
 import { Button, Card, ErrorNote, Field, SuccessNote } from '../components'
 
-export default function ManageFamily() {
+export default function MembersArea() {
   const { user: me } = useAuth()
   const [users, setUsers] = useState(null) // null = still loading
   const [error, setError] = useState('')
@@ -92,11 +94,11 @@ export default function ManageFamily() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-extrabold">Manage Family</h1>
+      <h1 className="text-2xl font-extrabold">Members Area</h1>
       <ErrorNote>{error}</ErrorNote>
       <SuccessNote>{notice}</SuccessNote>
 
-      <Card title="Add a Family Member">
+      <Card title="Add a Member">
         <form onSubmit={handleAdd} className="space-y-4">
           <Field
             label="Username (letters, numbers, underscores)"
@@ -119,7 +121,7 @@ export default function ManageFamily() {
         </form>
       </Card>
 
-      <Card title="Family Members">
+      <Card title="Members">
         {users === null ? (
           <p className="text-sm text-ink-soft">Loading…</p>
         ) : (

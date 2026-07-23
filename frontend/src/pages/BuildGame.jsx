@@ -27,9 +27,9 @@ function StatusBadge({ status }) {
   )
 }
 
-function ReplacePicker({ family, game, invite, onDone, setError, setBusy, busy }) {
+function ReplacePicker({ members, game, invite, onDone, setError, setBusy, busy }) {
   const takenIds = new Set(game.invites.map((i) => i.user.id))
-  const options = family.filter((u) => !takenIds.has(u.id))
+  const options = members.filter((u) => !takenIds.has(u.id))
   const [pick, setPick] = useState(options[0]?.id ?? '')
 
   async function handleResend(e) {
@@ -47,7 +47,7 @@ function ReplacePicker({ family, game, invite, onDone, setError, setBusy, busy }
   }
 
   if (options.length === 0) {
-    return <p className="mt-2 text-xs text-ink-soft">No other family members left to invite.</p>
+    return <p className="mt-2 text-xs text-ink-soft">No other members left to invite.</p>
   }
 
   return (
@@ -68,7 +68,7 @@ function ReplacePicker({ family, game, invite, onDone, setError, setBusy, busy }
   )
 }
 
-function DraftGame({ game, setGame, family, onEnded }) {
+function DraftGame({ game, setGame, members, onEnded }) {
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -147,7 +147,7 @@ function DraftGame({ game, setGame, family, onEnded }) {
             </div>
             {replacingId === invite.id && (
               <ReplacePicker
-                family={family}
+                members={members}
                 game={game}
                 invite={invite}
                 busy={busy}
@@ -198,7 +198,7 @@ function DraftGame({ game, setGame, family, onEnded }) {
   )
 }
 
-function NewGamePicker({ family, onCreated }) {
+function NewGamePicker({ members, onCreated }) {
   const { user: me } = useAuth()
   const [selected, setSelected] = useState([])
   const [error, setError] = useState('')
@@ -227,7 +227,7 @@ function NewGamePicker({ family, onCreated }) {
     <Card title="Pick 2-4 Players">
       <form onSubmit={handleSubmit} className="space-y-4">
         <ul className="divide-y divide-line">
-          {family.map((u) => (
+          {members.map((u) => (
             <li key={u.id} className="flex items-center gap-3 py-2.5">
               <input
                 type="checkbox"
@@ -257,16 +257,16 @@ export default function BuildGame() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [game, setGame] = useState(null)
-  const [family, setFamily] = useState([])
+  const [members, setMembers] = useState([])
 
   useEffect(() => {
     async function load() {
       try {
-        const [drafts, familyList] = await Promise.all([
+        const [drafts, memberList] = await Promise.all([
           api.listPendingCreatedGames(),
-          api.listFamily(),
+          api.listMembers(),
         ])
-        setFamily(familyList)
+        setMembers(memberList)
         setGame(drafts[0] ?? null)
       } catch (err) {
         setError(err.message)
@@ -284,9 +284,9 @@ export default function BuildGame() {
       {loading ? (
         <p className="text-sm text-ink-soft">Loading…</p>
       ) : game ? (
-        <DraftGame game={game} setGame={setGame} family={family} onEnded={() => setGame(null)} />
+        <DraftGame game={game} setGame={setGame} members={members} onEnded={() => setGame(null)} />
       ) : (
-        <NewGamePicker family={family} onCreated={setGame} />
+        <NewGamePicker members={members} onCreated={setGame} />
       )}
     </div>
   )

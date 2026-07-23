@@ -26,7 +26,7 @@ export function Button({ children, variant = 'primary', ...props }) {
   }
   return (
     <button
-      className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-colors disabled:cursor-not-allowed ${styles[variant]}`}
+      className={`rounded-xl px-4 py-2.5 text-sm font-bold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100 ${styles[variant]}`}
       {...props}
     >
       {children}
@@ -39,7 +39,7 @@ export function Field({ label, ...props }) {
     <label className="block">
       <span className="mb-1 block text-sm font-semibold text-ink-soft">{label}</span>
       <input
-        className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink outline-none focus:border-pine"
+        className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink outline-none transition-[border-color,box-shadow] focus:border-pine focus:ring-2 focus:ring-pine/15"
         {...props}
       />
     </label>
@@ -54,7 +54,7 @@ export function Select({ label, children, ...props }) {
   const select = (
     <div className="relative">
       <select
-        className="w-full appearance-none rounded-xl border border-line bg-white px-3.5 py-2.5 pr-9 text-sm text-ink outline-none focus:border-pine"
+        className="w-full appearance-none rounded-xl border border-line bg-white px-3.5 py-2.5 pr-9 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-pine focus:ring-2 focus:ring-pine/15"
         {...props}
       >
         {children}
@@ -106,15 +106,19 @@ export function EmptyState({ children }) {
   )
 }
 
-/* The four-dot Ludo mark used as the app logo. */
+/* The app mark: a die showing five, its pips in the four Ludo colors around a
+ * white center, on warm dark ink. Deliberately not pine-colored — the old green
+ * square camouflaged against the app's own green accent. Mirrors
+ * public/favicon.svg; change both together. */
 export function Logo({ size = 28 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect x="1" y="1" width="30" height="30" rx="7" className="fill-pine" />
-      <circle cx="11" cy="11" r="4" fill="#e64545" />
-      <circle cx="21" cy="11" r="4" fill="#2f9e44" />
-      <circle cx="11" cy="21" r="4" fill="#f2b705" />
-      <circle cx="21" cy="21" r="4" fill="#2e6fd8" />
+      <rect x="1" y="1" width="30" height="30" rx="8" className="fill-ink" />
+      <circle cx="9.5" cy="9.5" r="3.2" fill="#e64545" />
+      <circle cx="22.5" cy="9.5" r="3.2" fill="#2f9e44" />
+      <circle cx="9.5" cy="22.5" r="3.2" fill="#f2b705" />
+      <circle cx="22.5" cy="22.5" r="3.2" fill="#2e6fd8" />
+      <circle cx="16" cy="16" r="3.2" className="fill-ivory" />
     </svg>
   )
 }

@@ -1,4 +1,8 @@
-# Family Ludo — Project Reference
+# Codec Ludo — Project Reference
+
+> Renamed from "Family Ludo" in Phase 7 — **Codec Ludo** is the official name.
+> The game is invite-only for anyone the admin adds, no longer framed as
+> family-specific; spec references to "family" should be read as "members."
 
 This file is a living explainer for the project, written for someone who wants to
 understand every file and decision without writing code themselves. It gets updated
@@ -11,8 +15,10 @@ Phases 1-5 are signed off (Foundation, Dashboard shell, game creation flow, core
 game engine — including a long tail of follow-up polish rounds on Phase 4 — and
 game lifecycle: mid-game cancel, admin Confirm/Reject, points/stat aggregation).
 A same-day Phase 5 follow-up made usernames case-insensitive at login/creation
-(like Gmail). Phase 6 (Leaderboard wiring — the shared, sortable, all-players
-table) is built and awaiting the user's review sign-off.
+(like Gmail). Phase 6 (Leaderboard wiring) is signed off. Phase 7 (the final
+visual/UX polish pass, plus the Codec Ludo rebrand, new app icon, Members
+Area rename, and the real About page) is built and awaiting the user's review
+sign-off. After Phase 7: deployment (Render + Postgres + the user's domain).
 
 Section 13 is now a **two-gate cycle per phase**: (1) plan gate — describe what's
 about to be built and stop for approval, (2) build the phase, (3) review gate — stop,
@@ -777,6 +783,56 @@ swallowed by Vite itself instead of reaching FastAPI — the exact same class of
 bug as the `/debug` proxy omission from an earlier round. Caught proactively
 this time by checking the proxy list the moment the new route was added,
 before it ever shipped, rather than after a "something went wrong" report.
+
+## Phase 7 — what was built (rebrand + visual/UX polish pass)
+
+The final phase from spec Section 15, combined with a set of identity changes
+the user requested at the same time.
+
+**Rebrand: Family Ludo → Codec Ludo (official name).** `index.html` title,
+the Layout header, the Login page, and the backend's `FastAPI(title=...)` all
+say "Codec Ludo" now. The framing shifted from family-specific to
+invite-only-for-anyone: the admin still creates every account (unchanged
+mechanics), but the copy no longer assumes players are family.
+
+**New app icon.** The old pine-green square camouflaged against the app's own
+green accent (user complaint). The new mark — in both `public/favicon.svg`
+and the `Logo` component in `components.jsx`, which must be kept in sync by
+hand — is a die showing five on a warm dark-ink square: four pips in the four
+Ludo colors, white center pip. Reads as a board-game die at favicon size and
+contrasts with every app surface.
+
+**Members Area (was Manage Family).** `pages/ManageFamily.jsx` →
+`pages/MembersArea.jsx` (git mv, so history follows), route `/family` →
+`/members`, nav label "Members Area", card titles "Add a Member"/"Members".
+Backend route *paths* are untouched (`/users`, `/admin/users`) — only
+docstrings, the `list_members` function name, and the frontend
+`api.listMembers()` name changed, so nothing breaks for existing sessions.
+`BuildGame.jsx`'s internal `family` variables became `members` to match.
+
+**About page went live** (`AboutDeveloper.jsx`). Real content: Sunny Kumar's
+photo (web-optimized 512px square crop at `src/assets/developer.jpg` — the
+full-res original lives in the git-ignored `Archive/` folder and never gets
+committed), GitHub/LinkedIn/Website links, an honest credits paragraph
+(architecture and design by Sunny; Claude Code actively used during coding —
+deliberately no "hand-built" overclaim, at the user's explicit direction),
+and a short "About Codec Ludo" card describing the game. The page's template
+scaffolding (null-URL placeholder states, TODO markers) was removed.
+
+**Motion/polish.** A single subtle page-entry animation (`.animate-page-rise`
+in `index.css`: 0.28s fade + 6px rise) plays on every navigation — applied in
+`Layout.jsx` via a wrapper `div` keyed by `location.pathname` (the key is
+what makes it replay per route change; an unkeyed wrapper would animate once
+per login). Login's two blocks use the same class. Buttons gained a slight
+`active:scale-[0.98]` press; Field/Select gained a soft focus ring
+(`ring-pine/15`) with a border/shadow transition. Deliberately nothing more —
+spec Section 14 forbids gimmicky animation, and the board already has its own
+motion system from Phase 4.
+
+**Verified via** `npm run build` (clean) and checking the running backend's
+`/openapi.json` title. ESLint turned out to not actually be configured in
+this project (no flat-config file) — flagged rather than silently skipped;
+worth setting up someday but not a Phase 7 concern.
 
 ## How to use this file
 

@@ -1,7 +1,7 @@
 /* Route map for the whole app.
  *
  * Nesting mirrors the backend's guards: everything inside <RequireAuth> needs a
- * valid session; /family additionally sits inside <RequireAdmin>. The backend
+ * valid session; /members additionally sits inside <RequireAdmin>. The backend
  * still enforces both on every request — these client-side guards are just for
  * a sensible UX (no admin links shown to players, no flash of private pages). */
 
@@ -15,7 +15,7 @@ import Dashboard from './pages/Dashboard'
 import GamePage from './pages/GamePage'
 import Leaderboard from './pages/Leaderboard'
 import Login from './pages/Login'
-import ManageFamily from './pages/ManageFamily'
+import MembersArea from './pages/MembersArea'
 
 export default function App() {
   return (
@@ -30,7 +30,7 @@ export default function App() {
           <Route path="/build-game" element={<BuildGame />} />
           <Route path="/game/:gameId" element={<GamePage />} />
           <Route element={<RequireAdmin />}>
-            <Route path="/family" element={<ManageFamily />} />
+            <Route path="/members" element={<MembersArea />} />
           </Route>
         </Route>
       </Route>

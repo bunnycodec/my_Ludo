@@ -1,4 +1,4 @@
-"""Admin-only account management: create players, reset passwords, list family."""
+"""Admin-only account management: create members, reset passwords, list accounts."""
 
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import func, select

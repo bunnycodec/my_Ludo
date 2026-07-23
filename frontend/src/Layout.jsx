@@ -1,7 +1,7 @@
 /* The shared frame around every logged-in page: top bar with logo, navigation,
  * and logout. <Outlet /> is where the current page renders. */
 
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './auth'
 import { Logo } from './components'
 
@@ -24,6 +24,7 @@ function NavItem({ to, children }) {
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   async function handleLogout() {
     await logout()
@@ -36,12 +37,12 @@ export default function Layout() {
         <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 px-4 py-3">
           <div className="flex items-center gap-2 font-extrabold">
             <Logo />
-            <span>Family Ludo</span>
+            <span>Codec Ludo</span>
           </div>
           <nav className="ml-auto flex flex-wrap items-center gap-1">
             <NavItem to="/">Dashboard</NavItem>
             <NavItem to="/leaderboard">Leaderboard</NavItem>
-            {user?.role === 'admin' && <NavItem to="/family">Family</NavItem>}
+            {user?.role === 'admin' && <NavItem to="/members">Members Area</NavItem>}
             <NavItem to="/about">About</NavItem>
           </nav>
           <button
@@ -53,7 +54,11 @@ export default function Layout() {
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <Outlet />
+        {/* Keyed by path so the entry animation replays on every navigation,
+            not just the first mount. */}
+        <div key={location.pathname} className="animate-page-rise">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

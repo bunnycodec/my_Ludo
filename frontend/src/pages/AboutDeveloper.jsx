@@ -1,36 +1,25 @@
-/* About the Developer — a small credits page. Built as a template: the photo,
- * bio, and social links are placeholders until the user supplies real content
- * in a later refining pass (see the TODO markers below). */
+/* About the Developer — Sunny's credits page, plus a short intro to the game
+ * itself. The photo ships as a web-optimized copy in src/assets (the original
+ * stays out of the repo). */
 
 import { Card } from '../components'
+import photo from '../assets/developer.jpg'
 
-// TODO(refine): replace with the real photo (e.g. import from src/assets and pass
-// its path here), bio, and profile URLs.
 const DEVELOPER = {
-  name: 'Your Name Here',
-  tagline: 'Builder of this Ludo app for the family',
-  bio:
-    "This app was hand-built from scratch — backend, frontend, and everything in " +
-    'between — as a way to bring the family together for a game night, no matter ' +
-    "which city everyone's in. Replace this paragraph with your own story: what " +
-    'you do, why you built this, whatever feels right.',
-  photoUrl: null, // e.g. '/developer-photo.jpg' once you have one
-  githubUrl: null, // e.g. 'https://github.com/your-username'
-  linkedinUrl: null, // e.g. 'https://linkedin.com/in/your-profile'
+  name: 'Sunny Kumar',
+  tagline: 'Developer · bunnycodec.com',
+  githubUrl: 'https://github.com/bunnycodec',
+  linkedinUrl: 'https://www.linkedin.com/in/bunnycodec/',
+  websiteUrl: 'https://bunnycodec.com',
 }
 
 function SocialLink({ href, label, icon }) {
-  const filled = Boolean(href)
   return (
     <a
-      href={filled ? href : undefined}
-      target={filled ? '_blank' : undefined}
-      rel={filled ? 'noreferrer' : undefined}
-      aria-disabled={!filled}
-      title={filled ? label : `${label} link coming soon`}
-      className={`flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-bold transition-colors ${
-        filled ? 'bg-white text-ink hover:bg-parchment' : 'cursor-default bg-parchment/60 text-ink-soft'
-      }`}
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:bg-parchment"
     >
       {icon}
       {label}
@@ -45,27 +34,23 @@ export default function AboutDeveloper() {
 
       <Card>
         <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-          {DEVELOPER.photoUrl ? (
-            <img
-              src={DEVELOPER.photoUrl}
-              alt={DEVELOPER.name}
-              className="h-24 w-24 rounded-full object-cover"
-            />
-          ) : (
-            <div
-              className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-parchment text-3xl font-extrabold text-ink-soft"
-              aria-hidden="true"
-            >
-              ?
-            </div>
-          )}
+          <img
+            src={photo}
+            alt="Sunny Kumar"
+            className="h-24 w-24 shrink-0 rounded-full border-2 border-line object-cover"
+          />
           <div>
             <h2 className="text-xl font-extrabold">{DEVELOPER.name}</h2>
             <p className="text-sm font-semibold text-ink-soft">{DEVELOPER.tagline}</p>
           </div>
         </div>
 
-        <p className="mt-5 text-sm leading-relaxed text-ink">{DEVELOPER.bio}</p>
+        <p className="mt-5 text-sm leading-relaxed text-ink">
+          The architecture and design of Codec Ludo are my own work — the game flow, the
+          rules, the data model, and how it all looks and feels. During coding, Claude
+          Code (Anthropic's AI coding tool) was actively used, with every phase reviewed
+          and signed off before it landed.
+        </p>
 
         <div className="mt-5 flex flex-wrap gap-3">
           <SocialLink
@@ -86,10 +71,28 @@ export default function AboutDeveloper() {
               </svg>
             }
           />
+          <SocialLink
+            href={DEVELOPER.websiteUrl}
+            label="Website"
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" />
+                <ellipse cx="8" cy="8" rx="3" ry="6.5" />
+                <path d="M1.5 8h13M2.4 4.75h11.2M2.4 11.25h11.2" />
+              </svg>
+            }
+          />
         </div>
-        {!DEVELOPER.githubUrl && !DEVELOPER.linkedinUrl && (
-          <p className="mt-3 text-xs text-ink-soft">Links go live once added — coming soon.</p>
-        )}
+      </Card>
+
+      <Card title="About Codec Ludo">
+        <p className="text-sm leading-relaxed text-ink">
+          Codec Ludo is classic, strict-rules Ludo for 2 to 4 players, played live in the
+          browser. The server rolls every die and validates every move, so nobody can
+          cheat from their own screen. Finished games count only after the admin confirms
+          them, and every confirmed result feeds the all-time leaderboard. It's invite
+          only — there's no public signup; every account is created by the admin.
+        </p>
       </Card>
     </div>
   )
